@@ -1,0 +1,12 @@
+[project]
+name = "data-pipeline-orchestrator"
+version = "0.1.0"
+description = "ETL pipeline orchestration using Apache Airflow and DBT. Handles data extraction, transformation, and loading with automated workflows and data quality checks."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apache-airflow[google]==2.10.3",
+    "dbt-bigquery==1.8.3",
+    "dbt-core==1.8.8",
+    "psycopg2-binary==2.9.10",
+]

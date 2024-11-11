@@ -1,0 +1,83 @@
+version: 2
+
+sources:
+  - name: raw
+    tables:
+      - name: osm-france-food-service
+        tests:
+        - dbt_expectations.expect_table_row_count_to_be_between:
+            min_value: 155000
+        columns:
+          - name: name
+          - name: type
+          - name: operator
+          - name: brand
+          - name: cuisine
+          - name: vegetarian
+          - name: vegan
+          - name: opening_hours
+          - name: wheelchair
+          - name: delivery
+          - name: takeaway
+          - name: drive_through
+          - name: internet_access
+          - name: capacity
+          - name: stars
+            tests:
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  max_value: 5
+          - name: smoking
+          - name: wikidata
+          - name: siret
+          - name: phone
+          - name: website
+          - name: facebook
+          - name: meta_name_com
+          - name: meta_code_com
+          - name: meta_name_dep
+          - name: meta_code_dep
+          - name: meta_name_reg
+          - name: meta_code_reg
+          - name: meta_geo_point
+            tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: geography
+          - name: meta_osm_id
+      - name: export_alimconfiance
+        tests:
+          - dbt_expectations.expect_table_row_count_to_be_between:
+              min_value: 40000
+        columns:
+          - name: app_libelle_etablissement
+          - name: siret
+          - name: adresse_2_ua
+          - name: code_postal
+            tests:
+              - dbt_expectations.expect_column_value_lengths_to_equal:
+                  value: 5
+          - name: libelle_commune
+          - name: date_inspection
+          - name: app_libelle_activite_etablissement
+          - name: synthese_eval_sanit
+          - name: app_code_synthese_eval_sanit
+            tests:
+                - dbt_expectations.expect_column_values_to_be_between:
+                    min_value: 1
+                    max_value: 5
+          - name: agrement
+          - name: geores
+            tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: geography
+          - name: filtre
+          - name: ods_type_activite
+          - name: reg_name
+          - name: reg_code
+          - name: dep_name
+          - name: dep_code
+          - name: com_name
+          - name: com_code
+      - name: google_maps_platform-place_details
+      - name: tripadvisor-location_search
+      - name: tripadvisor-location_details
