@@ -10,8 +10,10 @@ SELECT
     iofff.meta_name_reg AS iofff_meta_name_reg,
     iofff.meta_geo_point AS iofff_meta_geo_point,
     iofff.meta_osm_id AS iofff_meta_osm_id,
-    ST_ASBINARY(iofff.meta_geo_point) AS iofff_meta_geo_point_geopandas,
     iofff.normalized_name AS iofff_normalized_name,
+    iofff.meta_geo_point_latitude AS iofff_meta_geo_point_latitude,
+    iofff.meta_geo_point_longitude AS iofff_meta_geo_point_longitude,
+    iofff.meta_geo_point_binary AS iofff_meta_geo_point_binary,
     iea.app_libelle_etablissement AS iea_app_libelle_etablissement,
     iea.siret AS iea_siret,
     iea.adresse_2_ua AS iea_adresse_2_ua,
@@ -28,7 +30,9 @@ SELECT
     iea.com_code AS iea_com_code,
     iea.normalized_app_libelle_etablissement AS iea_normalized_app_libelle_etablissement,
     iea.full_address AS iea_full_address,
-    ST_ASBINARY(iea.geores) AS iea_geores_geopandas,
+    iea.geores_latitude AS iea_geores_latitude,
+    iea.geores_longitude AS iea_geores_longitude,
+    iea.geores_binary AS iea_geores_binary,
     EDIT_DISTANCE(iofff.normalized_name, iea.normalized_app_libelle_etablissement) AS edit_distance_iofff_nn_iea_nale
 FROM
     {{ ref('int_osm-france-food-service') }} iofff

@@ -1,9 +1,11 @@
 SELECT
     rwgmat.*,
     sgmppd.rating AS sgmppd_rating,
+    sgmppd.googleMapsUri AS sgmppd_googleMapsUri,
     sgmppd.userRatingCount AS sgmppd_userRatingCount,
     sgmppd.displayName AS sgmppd_displayName,
     stld.name AS stld_name,
+    stld.web_url AS stld_web_url,
     stld.rating AS stld_rating,
     stld.num_reviews AS stld_num_reviews
 FROM
