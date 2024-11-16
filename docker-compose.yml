@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+    volumes:
+      - /opt/airflow/postgresql/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      interval: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    restart: always
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: ./airflow/scheduler/Dockerfile
+    command: uv run /opt/airflow/entrypoint.sh
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - GCP_SERVICE_ACCOUNT_KEY=${GCP_SERVICE_ACCOUNT_KEY}
+      - GCP_SERVICE_ACCOUNT_KEY_JSON_FILEPATH=${DOCKER_GCP_SERVICE_ACCOUNT_KEY_JSON_FILEPATH}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - /opt/airflow/data:/opt/airflow/data
+      - /opt/airflow/logs:/opt/airflow/logs
+      - ./suretbon:/opt/airflow/suretbon
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: ./airflow/webserver/Dockerfile
+    command: uv run /opt/airflow/entrypoint.sh
+    restart: always
+    depends_on:
+      - postgres
+      - airflow-scheduler
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - AIRFLOW_ADMIN_USERNAME=${AIRFLOW_ADMIN_USERNAME}
+      - AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_ADMIN_PASSWORD}
+      - AIRFLOW_ADMIN_EMAIL=${AIRFLOW_ADMIN_EMAIL}
+      - AIRFLOW_ADMIN_FIRST_NAME=${AIRFLOW_ADMIN_FIRST_NAME}
+      - AIRFLOW_ADMIN_LAST_NAME=${AIRFLOW_ADMIN_LAST_NAME}
+      - GCP_SERVICE_ACCOUNT_KEY=${GCP_SERVICE_ACCOUNT_KEY}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - GCP_BUCKET=${GCP_BUCKET}
+      - MAPS_PLATFORM_API_KEY=${MAPS_PLATFORM_API_KEY}
+      - TRIPADISOR_API_KEY=${TRIPADISOR_API_KEY}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - /opt/airflow/data:/opt/airflow/data
+      - /opt/airflow/logs:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /opt/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
