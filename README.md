@@ -86,6 +86,16 @@ ETL pipeline orchestration using Apache Airflow and DBT. Handles data extraction
             <td></td>
             <td></td>
         </tr>
+        <tr>
+            <td>GCP_ZONE</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>GCP_INSTANCE_NAME</td>
+            <td></td>
+            <td></td>
+        </tr>
     </tbody>
 </table>
 

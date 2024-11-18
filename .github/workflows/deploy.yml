@@ -1,0 +1,133 @@
+name: Deploy Data Pipeline Orchestrator to Google Cloud Platform
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy_data_pipeline_orchestrator:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      GCP_ZONE: ${{ secrets.GCP_ZONE }}
+      INSTANCE_NAME: ${{ secrets.GCP_INSTANCE_NAME }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Google Cloud Platform
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Generate and add SSH keys for GCP instance access
+        run: |
+          SERVICE_ACCOUNT=$(gcloud config get account)
+
+          if [ ! -f ~/.ssh/data-pipeline-orchestrator ]; then
+            ssh-keygen -t rsa -f ~/.ssh/data-pipeline-orchestrator -N "" -C "$SERVICE_ACCOUNT"
+          fi
+
+          gcloud compute os-login ssh-keys add \
+            --key-file ~/.ssh/data-pipeline-orchestrator.pub \
+            --ttl 300s \
+            --account=$SERVICE_ACCOUNT
+
+      - name: Start GCP instance for deployment
+        run: |
+          USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
+
+          gcloud compute instances start $INSTANCE_NAME --zone=$GCP_ZONE
+
+      - name: Stop existing Docker containers on GCP instance
+        run: |
+          USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
+
+          gcloud compute ssh "$USERNAME@$INSTANCE_NAME" \
+            --zone=$GCP_ZONE \
+            --command="if [ -d /opt/data-pipeline-orchestrator ] && [ -f /opt/data-pipeline-orchestrator/docker-compose.yml ]; then cd /opt/data-pipeline-orchestrator && sudo docker compose down; fi" \
+            --ssh-key-file=~/.ssh/data-pipeline-orchestrator \
+            --strict-host-key-checking=no \
+            --quiet
+
+      - name: Create deployment directory on GCP instance
+        run: |
+          USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
+
+          gcloud compute ssh "$USERNAME@$INSTANCE_NAME" \
+            --zone=$GCP_ZONE \
+            --command="sudo mkdir -p /opt/data-pipeline-orchestrator && sudo chown -R $USERNAME:$USERNAME /opt/data-pipeline-orchestrator" \
+            --ssh-key-file=~/.ssh/data-pipeline-orchestrator \
+            --strict-host-key-checking=no \
+            --quiet
+
+      - name: Copy deployment files to GCP instance
+        run: |
+          USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
+
+          gcloud compute scp \
+            --zone=$GCP_ZONE \
+            --strict-host-key-checking=no \
+            --ssh-key-file=~/.ssh/data-pipeline-orchestrator \
+            --recurse \
+            .python-version \
+            pyproject.toml \
+            suretbon \
+            airflow \
+            docker-compose.yml \
+            "$USERNAME@$INSTANCE_NAME:/opt/data-pipeline-orchestrator/"
+
+      - name: Deploy Data Pipeline Orchestrator with Docker Compose
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+          DOCKER_GCP_SERVICE_ACCOUNT_KEY_JSON_FILEPATH: ${{ secrets.DOCKER_GCP_SERVICE_ACCOUNT_KEY_JSON_FILEPATH }}
+          AIRFLOW_ADMIN_USERNAME: ${{ secrets.AIRFLOW_ADMIN_USERNAME }}
+          AIRFLOW_ADMIN_PASSWORD: ${{ secrets.AIRFLOW_ADMIN_PASSWORD }}
+          AIRFLOW_ADMIN_EMAIL: ${{ secrets.AIRFLOW_ADMIN_EMAIL }}
+          AIRFLOW_ADMIN_FIRST_NAME: ${{ secrets.AIRFLOW_ADMIN_FIRST_NAME }}
+          AIRFLOW_ADMIN_LAST_NAME: ${{ secrets.AIRFLOW_ADMIN_LAST_NAME }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GCP_BUCKET: ${{ secrets.GCP_BUCKET }}
+          MAPS_PLATFORM_API_KEY: ${{ secrets.MAPS_PLATFORM_API_KEY }}
+          TRIPADISOR_API_KEY: ${{ secrets.TRIPADISOR_API_KEY }}
+        run: |
+          USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
+
+          ENV_CONTENT="POSTGRES_DB=$POSTGRES_DB
+          POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+          POSTGRES_USER=$POSTGRES_USER
+          GCP_SERVICE_ACCOUNT_KEY='$GCP_SERVICE_ACCOUNT_KEY'
+          DOCKER_GCP_SERVICE_ACCOUNT_KEY_JSON_FILEPATH=$DOCKER_GCP_SERVICE_ACCOUNT_KEY_JSON_FILEPATH
+          AIRFLOW_ADMIN_USERNAME=$AIRFLOW_ADMIN_USERNAME
+          AIRFLOW_ADMIN_PASSWORD=$AIRFLOW_ADMIN_PASSWORD
+          AIRFLOW_ADMIN_EMAIL=$AIRFLOW_ADMIN_EMAIL
+          AIRFLOW_ADMIN_FIRST_NAME=$AIRFLOW_ADMIN_FIRST_NAME
+          AIRFLOW_ADMIN_LAST_NAME=$AIRFLOW_ADMIN_LAST_NAME
+          GCP_PROJECT_ID=$GCP_PROJECT_ID
+          GCP_BUCKET=$GCP_BUCKET
+          MAPS_PLATFORM_API_KEY=$MAPS_PLATFORM_API_KEY
+          TRIPADISOR_API_KEY=$TRIPADISOR_API_KEY"
+
+          gcloud compute ssh "$USERNAME@$INSTANCE_NAME" \
+            --zone=$GCP_ZONE \
+            --strict-host-key-checking=no \
+            --ssh-key-file=~/.ssh/data-pipeline-orchestrator \
+            --command="echo \"$ENV_CONTENT\" > /opt/data-pipeline-orchestrator/.env"
+
+          gcloud compute ssh "$USERNAME@$INSTANCE_NAME" \
+            --zone=$GCP_ZONE \
+            --strict-host-key-checking=no \
+            --ssh-key-file=~/.ssh/data-pipeline-orchestrator \
+            --command='cd /opt/data-pipeline-orchestrator && sudo docker compose --env-file .env up --build -d'
