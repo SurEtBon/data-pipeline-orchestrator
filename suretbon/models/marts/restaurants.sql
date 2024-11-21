@@ -1,20 +1,20 @@
 SELECT
     rwgmat.*,
-    sgmppd.rating AS sgmppd_rating,
-    sgmppd.googleMapsUri AS sgmppd_googleMapsUri,
-    sgmppd.userRatingCount AS sgmppd_userRatingCount,
-    sgmppd.displayName AS sgmppd_displayName,
-    stld.name AS stld_name,
-    stld.web_url AS stld_web_url,
-    stld.rating AS stld_rating,
-    stld.num_reviews AS stld_num_reviews
+    gmp_pd.rating AS `gmp_pd-rating`,
+    gmp_pd.googleMapsUri AS `gmp_pd-googleMapsUri`,
+    gmp_pd.userRatingCount AS `gmp_pd-userRatingCount`,
+    gmp_pd.displayName AS `gmp_pd-displayName`,
+    t_ld.name AS `t_ld-name`,
+    t_ld.web_url AS `t_ld-web_url`,
+    t_ld.rating AS `t_ld-rating`,
+    t_ld.num_reviews AS `t_ld-num_reviews`
 FROM
-    {{ ref('restaurants_without_google_maps_and_tripadvisor') }} rwgmat
+    {{ ref('int_osm-france-food-service_export_alimconfiance') }} rwgmat
 LEFT JOIN
-    {{ ref('stg_google_maps_platform-place_details') }} sgmppd
+    {{ ref('stg_google_maps_platform-place_details') }} gmp_pd
 ON
-    iofff_meta_osm_id = sgmppd.meta_osm_id
+    rwgmat.`osm_ffs-meta_osm_id` = gmp_pd.meta_osm_id
 LEFT JOIN
-    {{ ref('stg_tripadvisor-location_details') }} stld
+    {{ ref('stg_tripadvisor-location_details') }} t_ld
 ON
-    iofff_meta_osm_id = stld.meta_osm_id
+    rwgmat.`osm_ffs-meta_osm_id` = t_ld.meta_osm_id

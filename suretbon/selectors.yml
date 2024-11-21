@@ -1,16 +1,16 @@
 selectors:
-  - name: "restaurants_without_google_and_tripadvisor"
+  - name: "osm-france-food-service_export_alimconfiance"
     definition:
       union:
         - method: fqn
           value: "*"
         - exclude:
-          - method: fqn
-            value: stg_google_maps_platform-place_details
-          - method: fqn
-            value: stg_tripadvisor-location_details
-          - method: fqn
-            value: restaurants
+            - method: fqn
+              value: stg_google_maps_platform-place_details
+            - method: fqn
+              value: stg_tripadvisor-location_details
+            - method: fqn
+              value: restaurants
   - name: "restaurants"
     definition:
       union:

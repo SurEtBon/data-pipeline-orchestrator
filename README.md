@@ -77,7 +77,7 @@ ETL pipeline orchestration using Apache Airflow and DBT. Handles data extraction
             <td></td>
         </tr>
         <tr>
-            <td>MAPS_PLATFORM_API_KEY</td>
+            <td>GOOGLE_MAPS_PLATFORM_API_KEY</td>
             <td></td>
             <td></td>
         </tr>
@@ -104,7 +104,7 @@ cd suretbon && uv run dbt deps && uv run dbt test
 ```
 
 ```ShellSession
-cd suretbon && uv run dbt run --selector restaurants_without_google_and_tripadvisor
+cd suretbon && uv run dbt run --selector osm-france-food-service_export_alimconfiance
 ```
 
 ```ShellSession

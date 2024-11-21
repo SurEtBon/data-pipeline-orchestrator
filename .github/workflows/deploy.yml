@@ -100,7 +100,7 @@ jobs:
           AIRFLOW_ADMIN_LAST_NAME: ${{ secrets.AIRFLOW_ADMIN_LAST_NAME }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_BUCKET: ${{ secrets.GCP_BUCKET }}
-          MAPS_PLATFORM_API_KEY: ${{ secrets.MAPS_PLATFORM_API_KEY }}
+          GOOGLE_MAPS_PLATFORM_API_KEY: ${{ secrets.GOOGLE_MAPS_PLATFORM_API_KEY }}
           TRIPADISOR_API_KEY: ${{ secrets.TRIPADISOR_API_KEY }}
         run: |
           USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
@@ -117,7 +117,7 @@ jobs:
           AIRFLOW_ADMIN_LAST_NAME=$AIRFLOW_ADMIN_LAST_NAME
           GCP_PROJECT_ID=$GCP_PROJECT_ID
           GCP_BUCKET=$GCP_BUCKET
-          MAPS_PLATFORM_API_KEY=$MAPS_PLATFORM_API_KEY
+          GOOGLE_MAPS_PLATFORM_API_KEY=$GOOGLE_MAPS_PLATFORM_API_KEY
           TRIPADISOR_API_KEY=$TRIPADISOR_API_KEY"
 
           gcloud compute ssh "$USERNAME@$INSTANCE_NAME" \
