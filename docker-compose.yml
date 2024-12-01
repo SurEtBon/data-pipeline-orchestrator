@@ -57,7 +57,9 @@ services:
       - GCP_PROJECT_ID=${GCP_PROJECT_ID}
       - GCP_BUCKET=${GCP_BUCKET}
       - GOOGLE_MAPS_PLATFORM_API_KEY=${GOOGLE_MAPS_PLATFORM_API_KEY}
+      - GOOGLE_MAPS_PLATFORM_API_LIMIT=${GOOGLE_MAPS_PLATFORM_API_LIMIT}
       - TRIPADISOR_API_KEY=${TRIPADISOR_API_KEY}
+      - TRIPADISOR_API_LIMIT=${TRIPADISOR_API_LIMIT}
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/data:/opt/airflow/data

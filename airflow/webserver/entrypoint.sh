@@ -10,5 +10,7 @@ uv run airflow connections add 'google_cloud_default' \
 uv run airflow variables set GCP_PROJECT_ID $GCP_PROJECT_ID
 uv run airflow variables set GCP_BUCKET $GCP_BUCKET
 uv run airflow variables set GOOGLE_MAPS_PLATFORM_API_KEY $GOOGLE_MAPS_PLATFORM_API_KEY
+uv run airflow variables set GOOGLE_MAPS_PLATFORM_API_LIMIT $GOOGLE_MAPS_PLATFORM_API_LIMIT
 uv run airflow variables set TRIPADISOR_API_KEY $TRIPADISOR_API_KEY
+uv run airflow variables set TRIPADISOR_API_LIMIT $TRIPADISOR_API_LIMIT
 uv run airflow webserver

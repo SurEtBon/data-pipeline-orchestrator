@@ -82,7 +82,17 @@ ETL pipeline orchestration using Apache Airflow and DBT. Handles data extraction
             <td></td>
         </tr>
         <tr>
+            <td>GOOGLE_MAPS_PLATFORM_API_LIMIT</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
             <td>TRIPADISOR_API_KEY</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>TRIPADISOR_API_LIMIT</td>
             <td></td>
             <td></td>
         </tr>

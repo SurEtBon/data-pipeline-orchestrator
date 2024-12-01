@@ -101,7 +101,9 @@ jobs:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCP_BUCKET: ${{ secrets.GCP_BUCKET }}
           GOOGLE_MAPS_PLATFORM_API_KEY: ${{ secrets.GOOGLE_MAPS_PLATFORM_API_KEY }}
+          GOOGLE_MAPS_PLATFORM_API_LIMIT: ${{ secrets.GOOGLE_MAPS_PLATFORM_API_LIMIT }}
           TRIPADISOR_API_KEY: ${{ secrets.TRIPADISOR_API_KEY }}
+          TRIPADISOR_API_LIMIT: ${{ secrets.TRIPADISOR_API_LIMIT }}
         run: |
           USERNAME=$(gcloud compute os-login describe-profile --format="value(posixAccounts[0].username)")
 
@@ -118,7 +120,9 @@ jobs:
           GCP_PROJECT_ID=$GCP_PROJECT_ID
           GCP_BUCKET=$GCP_BUCKET
           GOOGLE_MAPS_PLATFORM_API_KEY=$GOOGLE_MAPS_PLATFORM_API_KEY
-          TRIPADISOR_API_KEY=$TRIPADISOR_API_KEY"
+          GOOGLE_MAPS_PLATFORM_API_LIMIT=$GOOGLE_MAPS_PLATFORM_API_LIMIT
+          TRIPADISOR_API_KEY=$TRIPADISOR_API_KEY
+          TRIPADISOR_API_LIMIT=$TRIPADISOR_API_LIMIT"
 
           gcloud compute ssh "$USERNAME@$INSTANCE_NAME" \
             --zone=$GCP_ZONE \
